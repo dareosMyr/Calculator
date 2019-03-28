@@ -1,21 +1,70 @@
 const keyContainer = document.querySelector('#keyContainer');
 const allKeys = document.querySelectorAll('#keyContainer div');
+const screen = document.querySelector('#screen h1');
+const operatorKeys = document.querySelectorAll('.operator');
+const numberKeys = document.querySelectorAll('.number')
+let input = '';
+let firNum = 0;
+let secNum = 0;
+let operator = 0;
+let inputArray = [];
+let operatorCheck = /[\/\-\+\*]/g;
+let numCheck = /[0-9]+[.][0-9]+|[0-9]+|[.][0-9]+/g;
 
-styleKeys();
-function styleKeys() {
-    for (let i = 0; i < allKeys.length; i++) {
-        allKeys[i].addEventListener('mouseover', () => {
-            allKeys[i].classList.add('hover');
-         })
-        allKeys[i].addEventListener('mouseleave', () => {
-            allKeys[i].classList.remove('hover');
+initKeys();
+function initKeys() {
+    allKeys.forEach(key => {
+        key.addEventListener('mouseover', () => {
+            key.classList.add('hovered');
         })
-        allKeys[i].addEventListener('mousedown', () => {
-            allKeys[i].classList.add('click');
-         })
-        allKeys[i].addEventListener('mouseup', () => {
-            allKeys[i].classList.remove('click');
+        key.addEventListener('mouseleave', () => {
+            key.classList.remove('hovered');
         })
+        key.addEventListener('mousedown', () => {
+            key.classList.add('clicked');
+        })
+        key.addEventListener('transitionend', removeTransition);
+        })
+    function removeTransition(e) {
+        if (e.propertyName !== 'background-color') return;
+        this.classList.remove('clicked');
+    }
+    operatorKeys.forEach(key => {
+        key.addEventListener('mousedown', () => {
+            operatorToggle(key);
+            calculate(key);
+        })
+    })
+    numberKeys.forEach(key => {
+        key.addEventListener('mousedown', () => {
+            getInput(key);
+        })
+    })
+}
+
+function getInput(key) {
+    screen.textContent = input += key.innerText;
+}
+
+function operatorToggle(key) {
+    if (input === '') {
+        return;
+    } else if (input.search(/^[0-9]/g) == 0 && input.search(operatorCheck) < 0) {
+        screen.textContent = input += key.textContent.trim();
+    } else if (input.search(operatorCheck) > -1) {
+        screen.textContent = input = input.replace(/[\/\-\+\*]$/g, key.innerText.trim());
+    }
+}
+
+function calculate(key) {
+    if (key.innerText === 'C') {
+        screen.textContent = input = '';
+    } else if (key.innerText === '=') {
+        inputArray = input.match(numCheck);
+        operator = input.match(operatorCheck).toString();
+        firNum = Number(inputArray[0]);
+        secNum = Number(inputArray[1]);
+        screen.textContent = input = (operate(operator, firNum, secNum).toString());
     }
 }
 
@@ -36,13 +85,13 @@ function divide(firNum, secNum) {
 }
 
 function operate(operator, firNum, secNum) {
-    if (operator == '+') {
+    if (operator === '+') {
         return add(firNum, secNum);
-    } else if (operator == '-') {
+    } else if (operator === '-') {
         return subtract(firNum, secNum);
-    } else if (operator == '*') {
+    } else if (operator === '*') {
         return multiply(firNum, secNum);
-    } else if (operator == '/') {
+    } else if (operator === '/') {
         return divide(firNum, secNum);
     } 
 }
