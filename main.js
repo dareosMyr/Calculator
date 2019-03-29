@@ -3,6 +3,7 @@ const allKeys = document.querySelectorAll('#keyContainer div');
 const screen = document.querySelector('#screen h1');
 const operatorKeys = document.querySelectorAll('.operator');
 const numberKeys = document.querySelectorAll('.number')
+const functionKeys = document.querySelectorAll('.function');
 let input = '';
 let firNum = 0;
 let secNum = 0;
@@ -23,16 +24,13 @@ function initKeys() {
         key.addEventListener('mousedown', () => {
             key.classList.add('clicked');
         })
-        key.addEventListener('transitionend', removeTransition);
+        key.addEventListener('mouseup', () => {
+            key.classList.remove('clicked');
         })
-    function removeTransition(e) {
-        if (e.propertyName !== 'background-color') return;
-        this.classList.remove('clicked');
-    }
+    })
     operatorKeys.forEach(key => {
         key.addEventListener('mousedown', () => {
             operatorToggle(key);
-            calculate(key);
         })
     })
     numberKeys.forEach(key => {
@@ -40,16 +38,34 @@ function initKeys() {
             getInput(key);
         })
     })
+    functionKeys.forEach(key => {
+        key.addEventListener('mousedown', () => {
+            calculate(key);
+        })
+    })
 }
 
 function getInput(key) {
-    screen.textContent = input += key.innerText;
+    if (key.innerText === '.') {
+        if (input.search(/[.]/g) == -1 || input.search(operatorCheck) > -1) {
+            screen.textContent = input += key.innerText;
+        }
+    } else {
+        screen.textContent = input += key.innerText;
+        if (input.length > 9) {
+            alert('Ten digit limit.');
+        }
+    }
 }
 
 function operatorToggle(key) {
     if (input === '') {
         return;
-    } else if (input.search(/^[0-9]/g) == 0 && input.search(operatorCheck) < 0) {
+    }
+    if (key.innerText === 'Del') {
+        console.log('hi');
+        screen.textContent = input = input.replace(/[0-9]$|[\/\-\+\*]$/g, '');
+    } else if (input.search(/[0-9]/g) > -1 && input.search(operatorCheck) < 0) {
         screen.textContent = input += key.textContent.trim();
     } else if (input.search(operatorCheck) > -1) {
         screen.textContent = input = input.replace(/[\/\-\+\*]$/g, key.innerText.trim());
@@ -59,12 +75,17 @@ function operatorToggle(key) {
 function calculate(key) {
     if (key.innerText === 'C') {
         screen.textContent = input = '';
-    } else if (key.innerText === '=') {
+    } else if (key.innerText === '=' && input.search(operatorCheck) > -1) {
         inputArray = input.match(numCheck);
         operator = input.match(operatorCheck).toString();
         firNum = Number(inputArray[0]);
         secNum = Number(inputArray[1]);
         screen.textContent = input = (operate(operator, firNum, secNum).toString());
+        if (input.length > 9) {
+            screen.textContent = parseFloat(input).toFixed(2);
+        }
+    } else if (key.innerText === '=' && input.search(operatorCheck) == -1) {
+        screen.textContent = input;
     }
 }
 
@@ -81,7 +102,7 @@ function multiply(firNum, secNum) {
 }
 
 function divide(firNum, secNum) {
-    return Number((firNum / secNum).toFixed(2));
+    return (firNum / secNum);
 }
 
 function operate(operator, firNum, secNum) {
