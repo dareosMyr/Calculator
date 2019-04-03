@@ -5,12 +5,13 @@ const operatorKeys = document.querySelectorAll('.operator');
 const numberKeys = document.querySelectorAll('.number')
 const functionKeys = document.querySelectorAll('.function');
 let input = '';
-let firNum = 0;
-let secNum = 0;
 let operator = 0;
 let inputArray = [];
+let firNum;
+let secNum;
 let operatorCheck = /[\/\-\+\*]/g;
 let numCheck = /[0-9]+[.][0-9]+|[0-9]+|[.][0-9]+/g;
+let inputCheck = /[0-9]+[.][0-9]+|[0-9]+|[.][0-9]+|[\/\-\+\*]/g;
 
 initKeys();
 function initKeys() {
@@ -63,9 +64,8 @@ function operatorToggle(key) {
         return;
     }
     if (key.innerText === 'Del') {
-        console.log('hi');
         screen.textContent = input = input.replace(/[0-9]$|[\/\-\+\*]$/g, '');
-    } else if (input.search(/[0-9]/g) > -1 && input.search(operatorCheck) < 0) {
+    } else if (input.search(/[0-9]/g) > -1 && input.search(/[0-9]$/g) > -1) {
         screen.textContent = input += key.textContent.trim();
     } else if (input.search(operatorCheck) > -1) {
         screen.textContent = input = input.replace(/[\/\-\+\*]$/g, key.innerText.trim());
@@ -76,17 +76,69 @@ function calculate(key) {
     if (key.innerText === 'C') {
         screen.textContent = input = '';
     } else if (key.innerText === '=' && input.search(operatorCheck) > -1) {
-        inputArray = input.match(numCheck);
+        shuntInput();
+        parseShunt();
+        
+        
+        /* inputArray = input.match(numCheck);
         operator = input.match(operatorCheck).toString();
         firNum = Number(inputArray[0]);
         secNum = Number(inputArray[1]);
         screen.textContent = input = (operate(operator, firNum, secNum).toString());
         if (input.length > 9) {
             screen.textContent = parseFloat(input).toFixed(2);
-        }
+        } */
     } else if (key.innerText === '=' && input.search(operatorCheck) == -1) {
         screen.textContent = input;
     }
+}
+
+function populateDisplay(item) {
+    screen.textContent = item;
+}
+
+function shuntInput() {
+    var outputQueue = [];
+    var operatorStack =[];
+    var precedence = {
+        '*' : 3,
+        '/' : 3,
+        '+' : 2,
+        '-' : 2
+    }
+    Array.prototype.peek = function() {
+        return this.slice(-1)[0];
+    }
+
+    inputArray = input.match(inputCheck);
+    inputArray.forEach(function(value) {
+        if (parseFloat(value)) {
+            outputQueue.push(value);
+        } else {
+            while (operatorStack.peek() && precedence[value] <= precedence[operatorStack.peek()]) {
+                outputQueue.push(operatorStack.pop());
+            }
+            operatorStack.push(value);
+        }
+    })
+    console.log(outputQueue.concat(operatorStack.reverse()));
+    return (outputQueue.concat(operatorStack.reverse()));
+}
+
+function parseShunt() {
+    var resultStack =[];
+    shuntInput().forEach(function(value){
+        if (parseFloat(value)) {
+            resultStack.push(value);
+        } else {
+            var firNum = resultStack.pop();
+            var secNum = resultStack.pop();
+            if (!parseFloat(value)) {
+                resultStack.push(operate(value, parseFloat(secNum), parseFloat(firNum)));
+            }
+        }
+    })
+    populateDisplay(resultStack.join(''));
 }
 
 function add(firNum, secNum) {
@@ -105,14 +157,14 @@ function divide(firNum, secNum) {
     return (firNum / secNum);
 }
 
-function operate(operator, firNum, secNum) {
-    if (operator === '+') {
+function operate(value, firNum, secNum) {
+    if (value === '+') {
         return add(firNum, secNum);
-    } else if (operator === '-') {
+    } else if (value === '-') {
         return subtract(firNum, secNum);
-    } else if (operator === '*') {
+    } else if (value === '*') {
         return multiply(firNum, secNum);
-    } else if (operator === '/') {
+    } else if (value === '/') {
         return divide(firNum, secNum);
     } 
 }
