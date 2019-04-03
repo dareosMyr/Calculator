@@ -1,19 +1,43 @@
-const keyContainer = document.querySelector('#keyContainer');
-const allKeys = document.querySelectorAll('#keyContainer div');
-const screen = document.querySelector('#screen h1');
+const allKeys = document.querySelectorAll('.keys div');
+const screen = document.querySelector('#screen h3');
+const resultScreen = document.querySelector('#resultScreen h1');
 const operatorKeys = document.querySelectorAll('.operator');
 const numberKeys = document.querySelectorAll('.number')
 const functionKeys = document.querySelectorAll('.function');
 let input = '';
-let operator = 0;
 let inputArray = [];
-let firNum;
-let secNum;
-let operatorCheck = /[\/\-\+\*]/g;
-let numCheck = /[0-9]+[.][0-9]+|[0-9]+|[.][0-9]+/g;
-let inputCheck = /[0-9]+[.][0-9]+|[0-9]+|[.][0-9]+|[\/\-\+\*]/g;
-
+const operatorCheck = /[\/\-\+\*]/g;
+const numCheck = /[0-9]+[.][0-9]+|[0-9]+|[.][0-9]+/g;
+const inputCheck = /[0-9]+[.][0-9]+|[0-9]+|[.][0-9]+|[\/\-\+\*]/g;
+populateDisplay(0);
+populateResult(0);
 initKeys();
+
+function populateDisplay(item) {
+    screen.textContent = item;
+}
+
+function populateResult(item) {
+    resultScreen.textContent = item;
+}
+
+function setInput(item) {
+    input = item;
+}
+
+function concatInput(item) {
+    input += item;
+}
+
+function clearAllDisplay() {
+    screen.textContent = '';
+    resultScreen.textContent = '';
+}
+
+function clearInput() {
+    input = '';
+}
+
 function initKeys() {
     allKeys.forEach(key => {
         key.addEventListener('mouseover', () => {
@@ -44,12 +68,27 @@ function initKeys() {
             calculate(key);
         })
     })
+    window.addEventListener('keydown', test);
+    window.addEventListener('transitionend', removeHover);
+}
+
+function test(e) {
+    const key = document.querySelector(`div[data-key='${e.keyCode}']`);
+    if (!key) console.log(e.keyCode);
+    key.classList.add('keyed');
+}
+
+function removeHover() {
+    allKeys.forEach(key => {
+        key.classList.remove('keyed');
+    })
 }
 
 function getInput(key) {
     if (key.innerText === '.') {
         if (input.search(/[.]/g) == -1 || input.search(operatorCheck) > -1) {
-            screen.textContent = input += key.innerText;
+            populateDisplay(key.innerText);
+            setInput(key.innerText);
         }
     } else {
         screen.textContent = input += key.innerText;
@@ -62,39 +101,29 @@ function getInput(key) {
 function operatorToggle(key) {
     if (input === '') {
         return;
-    }
-    if (key.innerText === 'Del') {
-        screen.textContent = input = input.replace(/[0-9]$|[\/\-\+\*]$/g, '');
+    } if (key.innerText === 'Del') {
+        setInput(input.replace(/[0-9]$|[\/\-\+\*]$/g, ''));
+        populateDisplay(input);
     } else if (input.search(/[0-9]/g) > -1 && input.search(/[0-9]$/g) > -1) {
-        screen.textContent = input += key.textContent.trim();
+        concatInput(key.textContent.trim());
+        populateDisplay(input);
     } else if (input.search(operatorCheck) > -1) {
-        screen.textContent = input = input.replace(/[\/\-\+\*]$/g, key.innerText.trim());
+        setInput(input.replace(/[\/\-\+\*]$/g, key.innerText.trim()));
+        populateDisplay(input);
     }
 }
 
 function calculate(key) {
     if (key.innerText === 'C') {
-        screen.textContent = input = '';
+        populateDisplay(0);
+        populateResult(0);
+        clearInput();
     } else if (key.innerText === '=' && input.search(operatorCheck) > -1) {
         shuntInput();
         parseShunt();
-        
-        
-        /* inputArray = input.match(numCheck);
-        operator = input.match(operatorCheck).toString();
-        firNum = Number(inputArray[0]);
-        secNum = Number(inputArray[1]);
-        screen.textContent = input = (operate(operator, firNum, secNum).toString());
-        if (input.length > 9) {
-            screen.textContent = parseFloat(input).toFixed(2);
-        } */
-    } else if (key.innerText === '=' && input.search(operatorCheck) == -1) {
-        screen.textContent = input;
+    } else if (key.innerText === '=' && input.search(operatorCheck) === -1) {
+        populateDisplay(input);
     }
-}
-
-function populateDisplay(item) {
-    screen.textContent = item;
 }
 
 function shuntInput() {
@@ -121,12 +150,11 @@ function shuntInput() {
             operatorStack.push(value);
         }
     })
-    console.log(outputQueue.concat(operatorStack.reverse()));
     return (outputQueue.concat(operatorStack.reverse()));
 }
 
 function parseShunt() {
-    var resultStack =[];
+    let resultStack =[];
     shuntInput().forEach(function(value){
         if (parseFloat(value)) {
             resultStack.push(value);
@@ -138,7 +166,7 @@ function parseShunt() {
             }
         }
     })
-    populateDisplay(resultStack.join(''));
+    populateResult(resultStack.join(''));
 }
 
 function add(firNum, secNum) {
@@ -168,16 +196,3 @@ function operate(value, firNum, secNum) {
         return divide(firNum, secNum);
     } 
 }
-
-/* function createKeys() {
-    for (let i = 0; i < 15; i++) {
-        var keys = document.createElement('div');
-        //keys.setAttribute('class', 'keys');
-        //keys.setAttribute('id', `${i}`);
-        //if (i >= 1 && i < 10) {
-        //    keys.textContent = `${i}`;
-       // }
-        keyContainer.appendChild(keys);
-    }
-}
-*/
