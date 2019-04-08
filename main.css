@@ -40,21 +40,22 @@
     width: 500px;
     top: 100px;
     margin: auto;
-    border: 2px dashed white;
+    /* border: 2px dashed white; */
     text-align: center;
 }
 
 h2 {
     color: aqua;
     margin: 20px auto;
+    text-shadow: black 2px 2px 2px;
 }
 
 #calcFrame {
     height: 500px;
     width: 400px;
-    border: solid white 2px;
+    /* border: solid white 2px; */
     margin: 20px auto;
-    background-color: rgba(255, 255, 255, .7);
+    /*background-color: rgba(255, 255, 255, .7);*/
 }
 
 #screen,#resultScreen {
@@ -72,7 +73,7 @@ h2 {
 }
 
 #resultScreen {
-    height: 95px;
+    height: 75px;
     margin: 0px 0px 4px 0px;
     right: 96px;
     box-shadow: inset 1px 1px 5px black, inset 0px 0px 0px black;
@@ -100,38 +101,49 @@ h2 {
     transition: all 0.07s ease;
 }
 
-#keyEquals {
-    grid-column: 3;
+#keyClear {
+    grid-column: 4;
+    grid-row: 1;
+}
+
+#keyMultiply {
+    grid-column: 4;
+    grid-row: 3;
+}
+
+#keyDivide {
+    grid-column: 4;
+    grid-row: 2;
+}
+
+#keyPlus {
+    grid-column: 4;
     grid-row: 4;
 }
 
-#keyClear {
-    grid-column: 2;
-    grid-row: 5;
-}
-
-#keyDel {
-    grid-column: 1;
-    grid-row: -1;
+.keys .operator, .keys .function {
+    background-color: rgb(59, 59, 59);
+    color: rgb(150, 150, 150);
+    text-shadow:black 2px 2px 2px;
 }
 
 .keys .keyed {
     text-shadow: grey 2px 2px 2px;
     border: 2px solid black;
-    background-color: rgba(120, 8, 148, 0.301);
+    background-color:  rgba(0, 255, 255, 0.692);
     color: white;
 }
 
 .keys .hovered {
     text-shadow: grey 2px 2px 2px;
     border: 2px solid black;
-    background-color: rgba(120, 8, 148, 0.301);
+    background-color: rgba(0, 255, 255, 0.692);
     color: white;
 }
 
 .keys .clicked {
     text-shadow: grey 2px 2px 2px;
-    border: 2px solid white;
+    border: 2px solid rgb(197, 197, 197);
     box-shadow: inset 1px 1px 5px white, inset -1px -1px 5px white;
-    background-color: white;
+    background-color: rgba(255, 255, 255, .2);
 }
